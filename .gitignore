@@ -1,0 +1,7 @@
+*.log
+.lein-repl-history
+/out
+/public/js
+.rebel_readline_history
+/resources/public/js
+/target
