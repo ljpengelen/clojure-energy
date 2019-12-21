@@ -65,14 +65,14 @@
 (def a-and-b (chan))
 (def a-over-b (chan))
 
-(defn prefer-a [] (put! a-over-b true))
-(defn prefer-b [] (put! a-over-b false))
-
-(a/go
-  (while true
+(defn update-a-and-b []
+  (a/go
     (let [[a b] (<! a-and-b)]
-      (reset! option-a a)
-      (reset! option-b b))))
+    (reset! option-a a)
+    (reset! option-b b))))
+
+(defn prefer-a [] (put! a-over-b true) (update-a-and-b))
+(defn prefer-b [] (put! a-over-b false) (update-a-and-b))
 
 (defn filter-view []
   [:div
@@ -93,6 +93,7 @@
 
 (defn sort-view []
   (let [res-c (async-sort @words-to-keep a-and-b a-over-b)]
+    (update-a-and-b)
     (go (let [res (<! res-c)]
         (reset! sorted-words res)
         (reset! view :sorted-summary))))
