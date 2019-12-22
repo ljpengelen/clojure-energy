@@ -1,7 +1,7 @@
 (ns clojure-energy.words)
 
 (def words
-  (shuffle [
+  [
     "Liefde"
     "Groei"
     "Orde en netheid"
@@ -71,4 +71,4 @@
     "Erkenning"
     "Waardering"
     "Status"
-]))
+])
