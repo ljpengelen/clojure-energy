@@ -116,17 +116,14 @@
 (defn up [i] (swap! sorted-words swap i (dec i)))
 
 (defn sorted-summary-view []
-  (let [show-buttons-atom (r/atom true)]
-    (fn []
-      (let [last (dec (count @sorted-words)) show-buttons @show-buttons-atom]
-        [:div
-          [:p "Words in order:"]
-          (word-list :ol @sorted-words
-            (fn [word i]
-              [:span
-                (if (and show-buttons (not= i 0)) [:button {:on-click #(up i)} "↑"] nil)
-                (if (and show-buttons (< i last)) [:button {:on-click #(down i)} "↓"] nil)]))
-          [:button {:on-click #(swap! show-buttons-atom not)} "toggle buttons"]]))))
+  (let [last (dec (count @sorted-words))]
+    [:div
+      [:p "Words in order:"]
+      (word-list :ol @sorted-words
+        (fn [word i]
+          [:span
+            (if (not= i 0) [:button {:on-click #(up i)} "↑"] nil)
+            (if (< i last) [:button {:on-click #(down i)} "↓"] nil)]))]))
 
 
 (defn page []
