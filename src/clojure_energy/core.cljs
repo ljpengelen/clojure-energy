@@ -8,9 +8,8 @@
 
 (defonce word-index (r/atom 0))
 
-(defonce words-to-keep (r/atom []))
-
-(defonce words-to-discard (r/atom []))
+(def words (shuffle w/words))
+(defonce partitioned-words (r/atom (zipmap words (repeat false))))
 
 (defonce sorted-words (r/atom []))
 
@@ -20,14 +19,14 @@
 
 (defn advance-word []
   (swap! word-index inc)
-  (when (= @word-index (count w/words)) (reset! view :filter-summary)))
+  (when (= @word-index (count words)) (reset! view :filter-summary)))
 
 (defn keep-word [word]
-  (swap! words-to-keep conj word)
+  (swap! partitioned-words assoc word true)
   (advance-word))
 
 (defn discard-word [word]
-  (swap! words-to-discard conj word)
+  (swap! partitioned-words assoc word false)
   (advance-word))
 
 (defn async-merge
@@ -76,21 +75,31 @@
     [:button {:on-click #(keep-word word)} "👍"]
     [:button {:on-click #(discard-word word)} "👎"]])
 
-(defn word-list [type words]
-  [type (map (fn [word] [:li {:key word} word]) words)])
+(defn word-list [type words controls]
+  [type (map (fn [word] [:li {:key word} word (controls word)]) words)])
 
 (defn start-sort [] (reset! view :sort))
+
+(defn words-to-keep [words]
+  (->> (seq words)
+      (filter (fn [[k v] p] (= v true)))
+      (map (fn [[k v] p] k))))
+
+(defn words-to-discard [words]
+  (->> (seq words)
+      (filter (fn [[k v] p] (= v false)))
+      (map (fn [[k v] p] k))))
 
 (defn filter-summary-view []
   [:div
     [:p "Words to keep:"]
-    (word-list :ul @words-to-keep)
+    (word-list :ul (words-to-keep @partitioned-words) (fn [word] [:button {:on-click #(discard-word word)} "👎"]))
     [:p "Words to discard:"]
-    (word-list :ul @words-to-discard)
+    (word-list :ul (words-to-discard @partitioned-words) (fn [word] [:button {:on-click #(keep-word word)} "👍"]))
     [:button {:on-click start-sort} "Let's sort"]])
 
 (defn sort-view []
-  (let [res-c (async-sort @words-to-keep a-and-b a-over-b)]
+  (let [res-c (async-sort (words-to-keep @partitioned-words) a-and-b a-over-b)]
     (update-a-and-b)
     (go (let [res (<! res-c)]
         (reset! sorted-words res)
@@ -103,13 +112,13 @@
 (defn sorted-summary-view []
     [:div
       [:p "Words in order:"]
-      (word-list :ol @sorted-words)])
+      (word-list :ol @sorted-words (fn [] nil))])
 
 (defn page []
   [:div
     [:h1 "NRG"]
     (condp = @view
-      :filter [filter-view (nth w/words @word-index)]
+      :filter [filter-view (nth words @word-index)]
       :filter-summary [filter-summary-view]
       :sort [sort-view]
       :sorted-summary [sorted-summary-view])])
