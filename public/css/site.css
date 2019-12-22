@@ -18,7 +18,8 @@ button {
 }
 
 @media print {
-  button {
+  button,
+  .unprintable {
     display: none;
   }
 }

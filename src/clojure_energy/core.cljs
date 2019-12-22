@@ -70,6 +70,10 @@
 
 (defn filter-view [word]
   [:div
+    [:p
+     "Hieronder verschijnen één voor één " (count words) " woorden. "
+     "Gebruik de knoppen om voor elk woord aan te geven of het voor jou een energiewoord is. "
+     "Achteraf is er nog de mogelijkheid om eventuele fouten te herstellen."]
     word
     [:br]
     [:button {:on-click #(keep-word word)} "👍"]
@@ -92,11 +96,18 @@
 
 (defn filter-summary-view []
   [:div
-    [:p "Words to keep:"]
+    [:p
+      "Ben je tevreden met de onderstaande indeling? Zo niet, "
+      "dan kun je fouten corrigeren met de knoppen achter de woorden."]
+    [:p
+      "Hoe meer energiewoorden je kiest, hoe meer werk je straks hebt om ze sorteren. "
+      "Het loont dus de moeite om selectief te zijn."]
+    [:p "Energiewoorden:"]
     (word-list :ul (words-to-keep @partitioned-words) (fn [word] [:button {:on-click #(discard-word word)} "👎"]))
-    [:p "Words to discard:"]
+    [:p "Afvallers:"]
     (word-list :ul (words-to-discard @partitioned-words) (fn [word] [:button {:on-click #(keep-word word)} "👍"]))
-    [:button {:on-click start-sort} "Let's sort"]])
+    [:p "Als je tevreden bent deze indeling, dan kun je nu je energiewoorden gaan sorteren."]
+    [:button {:on-click start-sort} "Sorteren maar"]])
 
 (defn sort-view []
   (let [res-c (async-sort (words-to-keep @partitioned-words) a-and-b a-over-b)]
@@ -106,6 +117,10 @@
         (reset! view :sorted-summary))))
   (fn []
     [:div
+      [:p
+        "Hieronder verschijnen steeds twee woorden. "
+        "Kies voor elk tweetal woorden het woord dat je voorkeur heeft als energiewoord. "
+        "Achteraf is er weer de mogelijkheid om fouten te corrigeren."]
       [:button {:on-click prefer-a} @option-a]
       [:button {:on-click prefer-b} @option-b]]))
 
@@ -118,7 +133,11 @@
 (defn sorted-summary-view []
   (let [last (dec (count @sorted-words))]
     [:div
-      [:p "Words in order:"]
+      [:p
+        "Hieronder staan je energiewoorden in de volgorde van jouw voorkeur. "
+        [:span
+         { :class "unprintable"}
+         "Je kunt nog aanpassingen doen met de knoppen achter de woorden."]]
       (word-list :ol @sorted-words
         (fn [word i]
           [:span
