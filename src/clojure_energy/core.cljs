@@ -18,18 +18,16 @@
 
 (defonce option-b (r/atom ""))
 
-(defn current-word [] (nth w/words @word-index))
-
 (defn advance-word []
   (swap! word-index inc)
   (when (= @word-index (count w/words)) (reset! view :filter-summary)))
 
-(defn keep-word []
-  (swap! words-to-keep conj (current-word))
+(defn keep-word [word]
+  (swap! words-to-keep conj word)
   (advance-word))
 
-(defn discard-word []
-  (swap! words-to-discard conj (current-word))
+(defn discard-word [word]
+  (swap! words-to-discard conj word)
   (advance-word))
 
 (defn word-list [type words]
@@ -74,12 +72,12 @@
 (defn prefer-a [] (put! a-over-b true) (update-a-and-b))
 (defn prefer-b [] (put! a-over-b false) (update-a-and-b))
 
-(defn filter-view []
+(defn filter-view [word]
   [:div
-    (current-word)
+    word
     [:br]
-    [:button {:on-click keep-word} "👍"]
-    [:button {:on-click discard-word} "👎"]])
+    [:button {:on-click #(keep-word word)} "👍"]
+    [:button {:on-click #(discard-word word)} "👎"]])
 
 (defn start-sort [] (reset! view :sort))
 
@@ -111,7 +109,7 @@
   [:div
     [:h1 "NRG"]
     (condp = @view
-      :filter [filter-view]
+      :filter [filter-view (nth w/words @word-index)]
       :filter-summary [filter-summary-view]
       :sort [sort-view]
       :sorted-summary [sorted-summary-view])])
