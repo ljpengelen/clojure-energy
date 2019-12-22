@@ -30,9 +30,6 @@
   (swap! words-to-discard conj word)
   (advance-word))
 
-(defn word-list [type words]
-  [type (map (fn [word] [:li {:key word} word]) words)])
-
 (defn async-merge
   ([left-c right-c opts-c prefs-c]
     (let [out-c (chan)]
@@ -78,6 +75,9 @@
     [:br]
     [:button {:on-click #(keep-word word)} "👍"]
     [:button {:on-click #(discard-word word)} "👎"]])
+
+(defn word-list [type words]
+  [type (map (fn [word] [:li {:key word} word]) words)])
 
 (defn start-sort [] (reset! view :sort))
 
