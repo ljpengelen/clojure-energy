@@ -76,7 +76,7 @@
     [:button {:on-click #(discard-word word)} "👎"]])
 
 (defn word-list [type words controls]
-  [type (map (fn [word] [:li {:key word} word (controls word)]) words)])
+  [type (map-indexed (fn [i word] [:li {:key word} word (controls word i)]) words)])
 
 (defn start-sort [] (reset! view :sort))
 
@@ -102,17 +102,32 @@
   (let [res-c (async-sort (words-to-keep @partitioned-words) a-and-b a-over-b)]
     (update-a-and-b)
     (go (let [res (<! res-c)]
-        (reset! sorted-words res)
+        (reset! sorted-words (into [] res))
         (reset! view :sorted-summary))))
   (fn []
     [:div
       [:button {:on-click prefer-a} @option-a]
       [:button {:on-click prefer-b} @option-b]]))
 
+(defn swap [v i1 i2] (assoc v i1 (v i2) i2 (v i1)))
+
+(defn down [i] (swap! sorted-words swap i (inc i)))
+
+(defn up [i] (swap! sorted-words swap i (dec i)))
+
 (defn sorted-summary-view []
-    [:div
-      [:p "Words in order:"]
-      (word-list :ol @sorted-words (fn [] nil))])
+  (let [show-buttons-atom (r/atom true)]
+    (fn []
+      (let [last (dec (count @sorted-words)) show-buttons @show-buttons-atom]
+        [:div
+          [:p "Words in order:"]
+          (word-list :ol @sorted-words
+            (fn [word i]
+              [:span
+                (if (and show-buttons (not= i 0)) [:button {:on-click #(up i)} "↑"] nil)
+                (if (and show-buttons (< i last)) [:button {:on-click #(down i)} "↓"] nil)]))
+          [:button {:on-click #(swap! show-buttons-atom not)} "toggle buttons"]]))))
+
 
 (defn page []
   [:div
