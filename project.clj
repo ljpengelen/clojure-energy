@@ -1,8 +1,7 @@
 (defproject clojure-energy "0.1.0"
-  :license {:name "Eclipse Public License"
-            :url "http://www.eclipse.org/legal/epl-v10.html"}
   :description "ClojureScript SPA for sorting words manually"
   :url "https://github.com/ljpengelen/clojure-energy"
+  :license {:name "MIT License"}
 
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/clojurescript "1.10.597"]
