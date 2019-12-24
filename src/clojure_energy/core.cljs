@@ -145,7 +145,6 @@
             (if (pos? i) [:button {:on-click #(up i)} "↑"] nil)
             (if (< i last) [:button {:on-click #(down i)} "↓"] nil)]))]))
 
-
 (defn page []
   [:div
     [:h1 "NRG"]
