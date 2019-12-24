@@ -68,16 +68,17 @@
 (defn prefer-a [] (put! a-over-b true) (update-a-and-b))
 (defn prefer-b [] (put! a-over-b false) (update-a-and-b))
 
-(defn filter-view [word]
-  [:div
-    [:p
-     "Hieronder verschijnen één voor één " (count words) " woorden. "
-     "Gebruik de knoppen om voor elk woord aan te geven of het voor jou een energiewoord is. "
-     "Achteraf is er nog de mogelijkheid om eventuele fouten te herstellen."]
-    word
-    [:br]
-    [:button {:on-click #(keep-word word)} "👍"]
-    [:button {:on-click #(discard-word word)} "👎"]])
+(defn filter-view []
+  (let [word (nth words @word-index)]
+    [:div
+      [:p
+       "Hieronder verschijnen één voor één " (count words) " woorden. "
+       "Gebruik de knoppen om voor elk woord aan te geven of het voor jou een energiewoord is. "
+       "Achteraf is er nog de mogelijkheid om eventuele fouten te herstellen."]
+      word
+      [:br]
+      [:button {:on-click #(keep-word word)} "👍"]
+      [:button {:on-click #(discard-word word)} "👎"]]))
 
 (defn word-list [type words controls]
   [type (map-indexed (fn [i word] [:li {:key word} word (controls word i)]) words)])
@@ -149,7 +150,7 @@
   [:div
     [:h1 "NRG"]
     (condp = @view
-      :filter [filter-view (nth words @word-index)]
+      :filter [filter-view]
       :filter-summary [filter-summary-view]
       :sort [sort-view]
       :sorted-summary [sorted-summary-view])])
