@@ -149,7 +149,7 @@
 (defn page []
   [:div
     [:h1 "NRG"]
-    (condp = @view
+    (case @view
       :filter [filter-view]
       :filter-summary [filter-summary-view]
       :sort [sort-view]
