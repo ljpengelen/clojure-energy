@@ -142,7 +142,7 @@
       (word-list :ol @sorted-words
         (fn [word i]
           [:span
-            (if (not= i 0) [:button {:on-click #(up i)} "↑"] nil)
+            (if (pos? i) [:button {:on-click #(up i)} "↑"] nil)
             (if (< i last) [:button {:on-click #(down i)} "↓"] nil)]))]))
 
 
