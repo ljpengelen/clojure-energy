@@ -69,13 +69,13 @@
 
 (defn words-to-keep [words]
   (->> (seq words)
-      (filter (fn [[k v] p] (= v true)))
-      (map (fn [[k v] p] k))))
+      (filter (fn [[_ v] p] (= v true)))
+      (map (fn [[k _] p] k))))
 
 (defn words-to-discard [words]
   (->> (seq words)
-      (filter (fn [[k v] p] (= v false)))
-      (map (fn [[k v] p] k))))
+      (filter (fn [[_ v] p] (= v false)))
+      (map (fn [[k _] p] k))))
 
 (defn filter-summary-view []
   [:div
