@@ -23,19 +23,19 @@
 
 (defn async-merge
   ([left-c right-c opts-c prefs-c]
-    (let [out-c (chan)]
-      (go
-        (let [left (<! left-c) right (<! right-c)]
-          (async-merge left right opts-c prefs-c [] out-c)))
-      out-c))
+   (let [out-c (chan)]
+     (go
+       (let [left (<! left-c) right (<! right-c)]
+         (async-merge left right opts-c prefs-c [] out-c)))
+     out-c))
   ([[l & *left :as left] [r & *right :as right] opts-c prefs-c acc out-c]
-    (if (and (not-empty left) (not-empty right))
-      (go
-          (>! opts-c [l r])
-          (if (<! prefs-c)
-            (async-merge *left right opts-c prefs-c (conj acc l) out-c)
-            (async-merge left *right opts-c prefs-c (conj acc r) out-c)))
-      (put! out-c (concat acc left right)))))
+   (if (and (not-empty left) (not-empty right))
+     (go
+         (>! opts-c [l r])
+         (if (<! prefs-c)
+           (async-merge *left right opts-c prefs-c (conj acc l) out-c)
+           (async-merge left *right opts-c prefs-c (conj acc r) out-c)))
+     (put! out-c (concat acc left right)))))
 
 (defn async-sort [vals opts-c prefs-c]
   (if (> (count vals) 1)
@@ -98,14 +98,14 @@
         a-and-b (chan)
         a-over-b (chan)
         update-a-and-b #(a/go
-          (let [[a b] (<! a-and-b)]
-          (reset! option-a a)
-          (reset! option-b b)))
+                         (let [[a b] (<! a-and-b)]
+                          (reset! option-a a)
+                          (reset! option-b b)))
         res-c (async-sort (words-to-keep @partitioned-words) a-and-b a-over-b)]
     (update-a-and-b)
     (go (let [res (<! res-c)]
-        (reset! sorted-words (into [] res))
-        (reset! view :sorted-summary)))
+         (reset! sorted-words (into [] res))
+         (reset! view :sorted-summary)))
     (fn []
       [:div
         [:p
