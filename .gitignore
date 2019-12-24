@@ -1,4 +1,5 @@
 *.log
+.lein-failures
 .lein-repl-history
 /out
 /public/js
