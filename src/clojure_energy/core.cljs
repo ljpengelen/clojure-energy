@@ -6,28 +6,20 @@
 
 (defonce view (r/atom :filter))
 
-(defonce word-index (r/atom 0))
-
 (def words (shuffle w/words))
 (defonce partitioned-words (r/atom (zipmap words (repeat false))))
 
+(defn keep-word [word] (swap! partitioned-words assoc word true))
+
+(defn discard-word [word] (swap! partitioned-words assoc word false))
+
 (defonce sorted-words (r/atom []))
 
-(defonce option-a (r/atom ""))
+(defn swap [v i1 i2] (assoc v i1 (v i2) i2 (v i1)))
 
-(defonce option-b (r/atom ""))
+(defn down [i] (swap! sorted-words swap i (inc i)))
 
-(defn advance-word []
-  (swap! word-index inc)
-  (when (= @word-index (count words)) (reset! view :filter-summary)))
-
-(defn keep-word [word]
-  (swap! partitioned-words assoc word true)
-  (advance-word))
-
-(defn discard-word [word]
-  (swap! partitioned-words assoc word false)
-  (advance-word))
+(defn up [i] (swap! sorted-words swap i (dec i)))
 
 (defn async-merge
   ([left-c right-c opts-c prefs-c]
@@ -56,34 +48,24 @@
       (put! out-c vals)
       out-c)))
 
-(def a-and-b (chan))
-(def a-over-b (chan))
-
-(defn update-a-and-b []
-  (a/go
-    (let [[a b] (<! a-and-b)]
-    (reset! option-a a)
-    (reset! option-b b))))
-
-(defn prefer-a [] (put! a-over-b true) (update-a-and-b))
-(defn prefer-b [] (put! a-over-b false) (update-a-and-b))
-
 (defn filter-view []
-  (let [word (nth words @word-index)]
-    [:div
-      [:p
-       "Hieronder verschijnen één voor één " (count words) " woorden. "
-       "Gebruik de knoppen om voor elk woord aan te geven of het voor jou een energiewoord is. "
-       "Achteraf is er nog de mogelijkheid om eventuele fouten te herstellen."]
-      word
-      [:br]
-      [:button {:on-click #(keep-word word)} "👍"]
-      [:button {:on-click #(discard-word word)} "👎"]]))
+  (let [index (r/atom 0)
+        advance #(do (swap! index inc)
+                   (when (= @index (count words)) (reset! view :filter-summary)))]
+    (fn []
+      (let [word (nth words @index)]
+        [:div
+          [:p
+           "Hieronder verschijnen één voor één " (count words) " woorden. "
+           "Gebruik de knoppen om voor elk woord aan te geven of het voor jou een energiewoord is. "
+           "Achteraf is er nog de mogelijkheid om eventuele fouten te herstellen."]
+          word
+          [:br]
+          [:button {:on-click #(do (keep-word word) (advance))} "👍"]
+          [:button {:on-click #(do (discard-word word) (advance))} "👎"]]))))
 
 (defn word-list [type words controls]
   [type (map-indexed (fn [i word] [:li {:key word} word (controls word i)]) words)])
-
-(defn start-sort [] (reset! view :sort))
 
 (defn words-to-keep [words]
   (->> (seq words)
@@ -108,28 +90,30 @@
     [:p "Afvallers:"]
     (word-list :ul (words-to-discard @partitioned-words) (fn [word] [:button {:on-click #(keep-word word)} "👍"]))
     [:p "Als je tevreden bent deze indeling, dan kun je nu je energiewoorden gaan sorteren."]
-    [:button {:on-click start-sort} "Sorteren maar"]])
+    [:button {:on-click #(reset! view :sort)} "Sorteren maar"]])
 
 (defn sort-view []
-  (let [res-c (async-sort (words-to-keep @partitioned-words) a-and-b a-over-b)]
+  (let [option-a (r/atom "")
+        option-b (r/atom "")
+        a-and-b (chan)
+        a-over-b (chan)
+        update-a-and-b #(a/go
+          (let [[a b] (<! a-and-b)]
+          (reset! option-a a)
+          (reset! option-b b)))
+        res-c (async-sort (words-to-keep @partitioned-words) a-and-b a-over-b)]
     (update-a-and-b)
     (go (let [res (<! res-c)]
         (reset! sorted-words (into [] res))
-        (reset! view :sorted-summary))))
-  (fn []
-    [:div
-      [:p
-        "Hieronder verschijnen steeds twee woorden. "
-        "Kies voor elk tweetal woorden het woord dat je voorkeur heeft als energiewoord. "
-        "Achteraf is er weer de mogelijkheid om fouten te corrigeren."]
-      [:button {:on-click prefer-a} @option-a]
-      [:button {:on-click prefer-b} @option-b]]))
-
-(defn swap [v i1 i2] (assoc v i1 (v i2) i2 (v i1)))
-
-(defn down [i] (swap! sorted-words swap i (inc i)))
-
-(defn up [i] (swap! sorted-words swap i (dec i)))
+        (reset! view :sorted-summary)))
+    (fn []
+      [:div
+        [:p
+          "Hieronder verschijnen steeds twee woorden. "
+          "Kies voor elk tweetal woorden het woord dat je voorkeur heeft als energiewoord. "
+          "Achteraf is er weer de mogelijkheid om fouten te corrigeren."]
+        [:button {:on-click #(do (put! a-over-b true) (update-a-and-b))} @option-a]
+        [:button {:on-click #(do (put! a-over-b false) (update-a-and-b))} @option-b]])))
 
 (defn sorted-summary-view []
   (let [last (dec (count @sorted-words))]
