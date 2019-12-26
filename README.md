@@ -1,22 +1,22 @@
+# NRG
 
-### Development mode
-To start the Figwheel compiler, navigate to the project folder and run the following command in the terminal:
+NRG is a small web app to manually filter and sort a fixed list of words.
 
-```
-lein figwheel
-```
+## Prerequisites
 
-Figwheel will automatically push cljs changes to the browser.
-Once Figwheel starts up, you should be able to open the `public/index.html` page in the browser.
+- Java 8 or newer
+- Leiningen
 
-### REPL
+## Development mode
 
-The project is setup to start nREPL on port `7002` once Figwheel starts.
-Once you connect to the nREPL, run `(cljs)` to switch to the ClojureScript REPL.
+To start the Figwheel compiler, navigate to the project folder and run `lein figwheel`.
+Figwheel will automatically push changes to the browser.
+Once Figwheel starts up, the app is opened in the browser.
+
+## Running tests
+
+To run all tests and watch for changes, execute `lein test-watch`.
 
 ### Building for production
 
-```
-lein clean
-lein package
-```
+To create a production build, execute `lein package`.
