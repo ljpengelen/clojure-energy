@@ -35,8 +35,7 @@
                          :optimizations :none
                          :pretty-print  true}
                         :figwheel
-                        {:on-jsload "clojure-energy.core/mount-root"
-                         :open-urls ["http://localhost:3449/index.html"]}}
+                        {:open-urls ["http://localhost:3449/index.html"]}}
                        :release
                        {:source-paths ["src" "env/prod/cljs"]
                         :compiler
