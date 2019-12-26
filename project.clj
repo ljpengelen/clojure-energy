@@ -9,6 +9,7 @@
                  [reagent "0.9.0-rc3"]]
 
   :plugins [[lein-cljsbuild "1.1.7"]
+            [lein-doo "0.1.11"]
             [lein-figwheel "0.5.19"]]
 
   :clean-targets ^{:protect false}
@@ -30,12 +31,19 @@
                         {:main "clojure-energy.dev"
                          :output-to "public/js/app.js"
                          :output-dir "public/js/out"
-                         :asset-path   "js/out"
+                         :asset-path "js/out"
                          :source-map true
                          :optimizations :none
-                         :pretty-print  true}
+                         :pretty-print true}
                         :figwheel
                         {:open-urls ["http://localhost:3449/index.html"]}}
+                       :test
+                       {:source-paths ["src" "test"]
+                        :compiler
+                        {:output-to "public/js/tests.js"
+                         :main "clojure-energy.test-runner"
+                         :optimizations :none
+                         :target :nodejs}}
                        :release
                        {:source-paths ["src" "env/prod/cljs"]
                         :compiler
@@ -45,7 +53,8 @@
                          :infer-externs true
                          :pretty-print false}}}}
 
-  :aliases {"package" ["do" "clean" ["cljsbuild" "once" "release"]]}
+  :aliases {"package" ["do" "clean" ["cljsbuild" "once" "release"]]
+            "test-watch" ["doo" "node" "test"]}
 
   :profiles {:dev {:source-paths ["src" "env/dev/clj"]
                    :dependencies [[binaryage/devtools "0.9.11"]
