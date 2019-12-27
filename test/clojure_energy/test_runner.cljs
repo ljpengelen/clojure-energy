@@ -1,6 +1,7 @@
 (ns clojure-energy.test-runner
   (:require
     [clojure-energy.core-test]
-    [doo.runner :refer-macros [doo-tests]]))
+    [figwheel.main.testing :refer [run-tests-async]]))
 
-(doo-tests 'clojure-energy.core-test)
+(defn -main [& args]
+  (run-tests-async 5000))

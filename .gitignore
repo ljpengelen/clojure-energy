@@ -1,8 +1,5 @@
-*.log
 .lein-failures
 .lein-repl-history
-/out
-/public/js
 .rebel_readline_history
-/resources/public/js
+/resources/public/cljs-out
 /target

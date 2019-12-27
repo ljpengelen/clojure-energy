@@ -1,4 +1,4 @@
-(ns clojure-energy.core
+(ns ^:figwheel-hooks clojure-energy.core
   (:require
     [clojure-energy.words :as w]
     [cljs.core.async :as a :refer [<! >! chan go put!]]
@@ -138,8 +138,8 @@
       :sort [sort-view]
       :sorted-summary [sorted-summary-view])])
 
-(defn mount-root []
-  (r/render [page] (.getElementById js/document "app")))
+(defn mount-root [] (r/render [page] (.getElementById js/document "app")))
 
-(defn init! []
-  (mount-root))
+(mount-root)
+
+(defn ^:after-load on-reload [] (mount-root))
