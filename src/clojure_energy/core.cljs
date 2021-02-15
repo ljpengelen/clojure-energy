@@ -124,7 +124,7 @@
          { :class "unprintable"}
          "Je kunt nog aanpassingen doen met de knoppen achter de woorden."]]
       (word-list :ol @sorted-words
-        (fn [word i]
+        (fn [_ i]
           [:span
             (if (pos? i) [:button {:on-click #(up i)} "↑"] nil)
             (if (< i last) [:button {:on-click #(down i)} "↓"] nil)]))]))
