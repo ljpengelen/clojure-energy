@@ -21,4 +21,4 @@ WORKDIR /app
 
 COPY project.clj .
 
-RUN lein install
+RUN lein fig:ci || true
