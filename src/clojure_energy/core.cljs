@@ -2,7 +2,8 @@
   (:require
     [clojure-energy.words :as w]
     [cljs.core.async :as a :refer [<! >! chan go put!]]
-    [reagent.core :as r]))
+    [reagent.core :as r]
+    [reagent.dom :as rdom]))
 
 (defonce view (r/atom :filter))
 
@@ -138,7 +139,7 @@
       :sort [sort-view]
       :sorted-summary [sorted-summary-view])])
 
-(defn mount-root [] (r/render [page] (.getElementById js/document "app")))
+(defn mount-root [] (rdom/render [page] (.getElementById js/document "app")))
 
 (mount-root)
 
